@@ -1,0 +1,39 @@
+{
+    "name": "hackheim/memberpayment2",
+    "description": "Payment system based on stripe for monthly fees",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Hackheim",
+            "email": "hackheim@hackheim.no"
+        }
+    ],
+    "repositories": [{
+        "type": "package",
+        "package": {
+            "name": "redbeanphp",
+            "version": "master",
+            "dist": {
+                "url": "http://www.redbeanphp.com/downloadredbean.php",
+                "type": "tar"
+            }
+        }
+    }],
+    "config": {
+        "secure-http": false 
+    },
+    "autoload": {
+        "files": [
+            "vendor/redbeanphp/rb.php"
+        ]
+    },
+    "require": {
+        "bcosca/fatfree-core": "dev-master",
+        "redbeanphp": "master@dev",
+        "vlucas/phpdotenv": "~2.4",
+        "stripe/stripe-php": "~4.3",
+        "oasis/logging": "~1.2",
+        "dompdf/dompdf": "~0.8.0",
+        "respect/validation": "~1.1"
+    }
+}
