@@ -136,7 +136,7 @@ $f3->route('POST /pay',
     function() {
         try
         {
-            if (is_user_logged_in())
+            if (!is_user_logged_in())
                 header('Location: error');
 
             $member  = R::findOne('member', ' token = ? ', [ $_COOKIE["session"] ] );
@@ -177,13 +177,10 @@ $f3->route('POST /pay',
 
 $f3->route('GET /welcome',
     function() {
-        if (!is_user_logged_in())
-            header('Location: error');
-
-        echo (new View)->render('../views/welcome.php');
-
         unset($_COOKIE['session']);
         setcookie('session', '', time() - 3600, '/');
+	
+        echo (new View)->render('../views/welcome.php');
     }
 );
 
