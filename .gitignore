@@ -2,7 +2,7 @@
 *.box
 .vagrant
 .bashrc
-vendor
+/vendor
 .env
 composer.lock
 logs
