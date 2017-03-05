@@ -1,0 +1,56 @@
+server_tokens off;
+
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    server_name payment.hackheim.no;
+
+    return 301 https://$host$request_uri;
+}
+
+server {
+    ssl on;
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name payment.hackheim.no;
+    
+    ssl_certificate /etc/letsencrypt/live/payment.hackheim.no/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/payment.hackheim.no/privkey.pem;
+
+
+    ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+    ssl_prefer_server_ciphers on;
+    ssl_ciphers "EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH";
+    ssl_ecdh_curve secp384r1; # Requires nginx >= 1.1.0
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_tickets off; # Requires nginx >= 1.5.9
+    ssl_stapling on; # Requires nginx >= 1.3.7
+    ssl_stapling_verify on; # Requires nginx => 1.3.7
+    ssl_dhparam /etc/ssl/certs/dhparam.pem;
+    resolver 8.8.8.8 8.8.4.4 valid=300s;
+    resolver_timeout 5s;
+    add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload";
+    add_header X-Frame-Options DENY;
+    add_header X-Content-Type-Options nosniff;
+    
+    root /home/payment/production/public;
+    index index.php index.html index.htm;
+
+    try_files $uri $uri/ /index.php;
+
+    location ~ \.php {
+        try_files $uri =403;
+        fastcgi_pass unix:/var/run/php/php7.0-fpm.sock;
+        fastcgi_index /index.php;
+
+        include /etc/nginx/fastcgi_params;
+
+        fastcgi_split_path_info       ^(.+\.php)(/.+)$;
+        fastcgi_param PATH_INFO       $fastcgi_path_info;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+    }
+
+    location ~ /\.ht {
+        deny all;
+    }
+}
