@@ -29,7 +29,7 @@ This is how a migration is created and executed:
     php vendor/bin/phinx create SomeChangeYouWantToDo
     # Edit it
     # Run it:
-    php vendor/bin/phinx migrate -c lib/phinx.php
+    php vendor/bin/phinx migrate -c phinx.php
 
 
 ## Documentation

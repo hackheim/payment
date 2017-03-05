@@ -11,9 +11,10 @@ use Respect\Validation\Validator as v;
 $dotenv = new Dotenv\Dotenv('../');
 $dotenv->load();
 $dotenv->required(array(
-    'DATABASE', 
-    'DATABASE_USER', 
-    'DATABASE_PASSWORD',
+    'PHINX_DBHOST', 
+    'PHINX_DBNAME',
+    'PHINX_DBUSER', 
+    'PHINX_DBPASS',
     'STRIPE_SECRET_KEY',
     'STRIPE_PUBLIC_KEY',
     'STRIPE_PLAN_NAME', 
@@ -32,7 +33,8 @@ date_default_timezone_set(getenv('TIMEZONE'));
 MLogging::addHandler(new LocalFileHandler("../logs"));
 
 $f3 = \Base::instance();
-R::setup(getenv('DATABASE'),getenv('DATABASE_USER'),getenv('DATABASE_PASSWORD'));
+
+R::setup("mysql:host=".getenv('PHINX_DBHOST').";dbname=".getenv('PHINX_DBNAME'),getenv('PHINX_DBUSER'),getenv('PHINX_DBPASS'));
 R::freeze(true);
 
 \Stripe\Stripe::setApiKey(getenv('STRIPE_SECRET_KEY'));
@@ -105,6 +107,7 @@ $f3->route('POST /details',
         $member  = R::findOne( 'member', ' token = ? ', [ $_COOKIE["session"] ] );
 
         $member->organization_number = $_POST['organization_number'];
+        $member->company_name = $_POST['company_name'];
         $member->phone = $_POST['phone'];
 
         R::store($member);
