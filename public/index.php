@@ -181,7 +181,7 @@ $f3->route('POST /pay',
 $f3->route('GET /welcome',
     function() {
         unset($_COOKIE['session']);
-        setcookie("session", '', time() - 3600, '/', '', getenv('SECURE_COOKIE'), true);
+        setcookie("session", '', time() - 3600, '/', getenv('DOMAIN'), getenv('SECURE_COOKIE')=='true', true);
 	
         echo (new View)->render('../views/welcome.php');
     }
