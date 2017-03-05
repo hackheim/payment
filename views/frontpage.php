@@ -17,7 +17,7 @@
 <p class="error"><?php echo $error_email; ?></p>
 <?php } ?>
 <form action="/check_email" method="POST">
-    <label for="email">Enter e-mail to setup payment:</label>
+    <label for="email">Enter e-mail to continue:</label>
     <input type="email" name="email">
     <input type="submit" value="Log in" />
 </form>
