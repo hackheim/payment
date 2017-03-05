@@ -26,7 +26,9 @@ $dotenv->required(array(
     'PRODUCT_NAME',
     'PRODUCT_COST',
     'PRODUCT_TAX_PERCENT',
-    'LOCALE'
+    'LOCALE',
+    'DOMAIN',
+    'SECURE_COOKIE'
 ));
 
 date_default_timezone_set(getenv('TIMEZONE'));
@@ -61,7 +63,7 @@ $f3->route('GET /',
 $f3->route('POST /check_email',
     function($f3) {
         $email = filter_var($_POST['email'], FILTER_SANITIZE_EMAIL);
-        //$email ="lol";
+        
         if (v::email()->validate($email))
         {
             $member  = R::findOne('member', ' email = ? ', [ $email ] );
@@ -73,7 +75,8 @@ $f3->route('POST /check_email',
                 $member->token = bin2hex(openssl_random_pseudo_bytes(64));
                 $id = R::store($member);
 
-                setcookie("session", $member->token, time()+3600*24);
+                setcookie("session", $member->token, time()+3600*24, '/', getenv('DOMAIN'), getenv('SECURE_COOKIE')==='true', true);
+
                 header('Location: details');
             }
             else
@@ -178,7 +181,7 @@ $f3->route('POST /pay',
 $f3->route('GET /welcome',
     function() {
         unset($_COOKIE['session']);
-        setcookie('session', '', time() - 3600, '/');
+        setcookie("session", '', time() - 3600, '/', '', getenv('SECURE_COOKIE'), true);
 	
         echo (new View)->render('../views/welcome.php');
     }
