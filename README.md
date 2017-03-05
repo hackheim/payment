@@ -7,7 +7,7 @@
 ## Getting Started
 
     - Some server requrements: ´apt install php-mysql php-gd php-curl php-xml php-mbstring php-intl´
-    - run ´composer.phar install´
+    - run ´composer.phar install´ (or composer.phar update if your are upgrading)
     - copy ´.env.example´ to ´.env´ and edit the values
     - migrate the DB ´php vendor/bin/phinx migrate -c lib/phinx.php´
     - setup apache/nginx/etc or try it out with ´php -S localhost:8000 -t public/´

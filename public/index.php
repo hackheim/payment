@@ -168,9 +168,9 @@ $f3->route('POST /pay',
         }
         catch(Exception $e)
         {
-          header('Location: error');
           merror("unable to sign up customer: " . $_POST['stripeEmail'].
             ", error:" . $e->getMessage());
+          header('Location: error');
         }
     }
 );
