@@ -1,4 +1,6 @@
 <?php
+error_reporting(0);
+
 require '../vendor/autoload.php';
 
 use Dompdf\Dompdf;
@@ -187,17 +189,24 @@ $f3->route('GET /welcome',
     }
 );
 
-$f3->route('GET /callback',
+$f3->route('POST /callback',
     function($f3) {
         $input = @file_get_contents("php://input");
         $event_json = json_decode($input);
 
         // Verify the event by fetching it from Stripe
         $event = \Stripe\Event::retrieve($event_json->id);
+	
+        minfo(json_encode($event, JSON_PRETTY_PRINT));       
         
-        //$member  = R::findOne('member', ' customer_id = ? ', [ $customer_id ] );
+	if ($event->type === 'charge.succeeded')
+	{
+        $charge = $event->data->object;
+	$reference_number = $charge->id;
+	$customer_id = $charge->customer;
+        $member  = R::findOne('member', ' customer_id = ? ', [ $customer_id ] );
 
-        $reference_number = '1lol';//TODO: get from stripe
+        //$reference_number = '1lol';//TODO: get from stripe
         $product_cost = getenv('PRODUCT_COST');
         $product_tax_percent = getenv('PRODUCT_TAX_PERCENT');
         $product_tax_amount = $total_tax_amount = $product_cost*($product_tax_percent/100);
@@ -216,10 +225,10 @@ $f3->route('GET /callback',
         $f3->set('date_and_time', date("Y-m-d H:i:s"));
         
 
-        $f3->set('customer_name', 'Ola Nordmann');
-        $f3->set('customer_address', 'Slottsgaten 1');
-        $f3->set('customer_org_number', '987654321');
-        $f3->set('customer_number', '2');
+        $f3->set('customer_name', $member->name);
+        $f3->set('customer_address', $member->address);
+        $f3->set('customer_org_number', $member->organization_number);
+        $f3->set('customer_number', $member->id);
 
         $f3->set('product_name', getenv('PRODUCT_NAME'));
         $f3->set('product_quantity', '1');
@@ -233,8 +242,8 @@ $f3->route('GET /callback',
         $f3->set('receipt_total_tax_amount', $currencyFormatter->formatCurrency($total_tax_amount, $currency));
         $f3->set('receipt_text', '');
 
-        $f3->set('credit_card_end', '1234');
-        $f3->set('credit_card_type', 'VISA');
+        $f3->set('credit_card_end', $charge->source->last4);
+        $f3->set('credit_card_type', $charge->source->brand);
 
         $html = (new View)->render('../views/receipt.php');
 
@@ -242,6 +251,7 @@ $f3->route('GET /callback',
         $dompdf->loadHtml($html);
         $dompdf->render();
         file_put_contents("../receipts/receipt_{$reference_number}.pdf", $dompdf->output());
+        }
     }
 );
 
