@@ -8,6 +8,7 @@ use Oasis\Mlib\Logging\ConsoleHandler;
 use Oasis\Mlib\Logging\LocalFileHandler;
 use Oasis\Mlib\Logging\MLogging;
 use Respect\Validation\Validator as v;
+use Mailgun\Mailgun;
 
 
 $dotenv = new Dotenv\Dotenv('../');
@@ -30,7 +31,9 @@ $dotenv->required(array(
     'PRODUCT_TAX_PERCENT',
     'LOCALE',
     'DOMAIN',
-    'SECURE_COOKIE'
+    'SECURE_COOKIE',
+    'MAILGUN_KEY',
+    'MAILGUN_DOMAIN'
 ));
 
 date_default_timezone_set(getenv('TIMEZONE'));
@@ -42,6 +45,7 @@ R::setup("mysql:host=".getenv('PHINX_DBHOST').";dbname=".getenv('PHINX_DBNAME'),
 R::freeze(true);
 
 \Stripe\Stripe::setApiKey(getenv('STRIPE_SECRET_KEY'));
+
 
 function is_user_logged_in()
 {
@@ -199,58 +203,76 @@ $f3->route('POST /callback',
 	
         minfo(json_encode($event, JSON_PRETTY_PRINT));       
         
-	if ($event->type === 'charge.succeeded')
-	{
-        $charge = $event->data->object;
-	$reference_number = $charge->id;
-	$customer_id = $charge->customer;
-        $member  = R::findOne('member', ' customer_id = ? ', [ $customer_id ] );
+    	if ($event->type === 'charge.succeeded')
+    	{
+            $charge = $event->data->object;
+            $reference_number = $charge->id;
+            $customer_id = $charge->customer;
+            $member  = R::findOne('member', ' customer_id = ? ', [ $customer_id ] );
 
-        //$reference_number = '1lol';//TODO: get from stripe
-        $product_cost = getenv('PRODUCT_COST');
-        $product_tax_percent = getenv('PRODUCT_TAX_PERCENT');
-        $product_tax_amount = $total_tax_amount = $product_cost*($product_tax_percent/100);
-        $total_amount = $product_cost + $product_tax_amount;
-        $product_amount = $product_cost + $product_tax_amount;
+            //$reference_number = '1lol';//TODO: get from stripe
+            $product_cost = getenv('PRODUCT_COST');
+            $product_tax_percent = getenv('PRODUCT_TAX_PERCENT');
+            $product_tax_amount = $total_tax_amount = $product_cost*($product_tax_percent/100);
+            $total_amount = $product_cost + $product_tax_amount;
+            $product_amount = $product_cost + $product_tax_amount;
 
-        $currencyFormatter = new NumberFormatter(getenv('LOCALE'), NumberFormatter::CURRENCY);
-        $currency = getenv('CURRENCY_NAME');
+            $currencyFormatter = new NumberFormatter(getenv('LOCALE'), NumberFormatter::CURRENCY);
+            $currency = getenv('CURRENCY_NAME');
 
-        $f3->set('logo', dirname(__FILE__).'/img/logo.png');
+            $f3->set('logo', dirname(__FILE__).'/img/logo.png');
 
-        $f3->set('currency_name', getenv('CURRENCY_NAME'));
-        $f3->set('tax_name', getenv('TAX_NAME'));
-        $f3->set('org_number', getenv('ORG_NUMBER'));
-        $f3->set('org_name', getenv('ORG_NAME'));
-        $f3->set('date_and_time', date("Y-m-d H:i:s"));
-        
+            $f3->set('currency_name', getenv('CURRENCY_NAME'));
+            $f3->set('tax_name', getenv('TAX_NAME'));
+            $f3->set('org_number', getenv('ORG_NUMBER'));
+            $f3->set('org_name', getenv('ORG_NAME'));
+            $f3->set('date_and_time', date("Y-m-d H:i:s"));
+            
 
-        $f3->set('customer_name', $member->name);
-        $f3->set('customer_address', $member->address);
-        $f3->set('customer_org_number', $member->organization_number);
-        $f3->set('customer_number', $member->id);
+            $f3->set('customer_name', $member->name);
+            $f3->set('customer_address', $member->address);
+            $f3->set('customer_org_number', $member->organization_number);
+            $f3->set('customer_number', $member->id);
 
-        $f3->set('product_name', getenv('PRODUCT_NAME'));
-        $f3->set('product_quantity', '1');
-        $f3->set('product_cost', $currencyFormatter->formatCurrency($product_amount, $currency));
-        
-        $f3->set('product_tax_percent', $product_tax_percent);
-        $f3->set('product_tax_amount', $currencyFormatter->formatCurrency($product_tax_amount, $currency));
+            $f3->set('product_name', getenv('PRODUCT_NAME'));
+            $f3->set('product_quantity', '1');
+            $f3->set('product_cost', $currencyFormatter->formatCurrency($product_amount, $currency));
+            
+            $f3->set('product_tax_percent', $product_tax_percent);
+            $f3->set('product_tax_amount', $currencyFormatter->formatCurrency($product_tax_amount, $currency));
 
-        $f3->set('reference_number', $reference_number);
-        $f3->set('receipt_total_amount', $currencyFormatter->formatCurrency($total_amount, $currency));
-        $f3->set('receipt_total_tax_amount', $currencyFormatter->formatCurrency($total_tax_amount, $currency));
-        $f3->set('receipt_text', '');
+            $f3->set('reference_number', $reference_number);
+            $f3->set('receipt_total_amount', $currencyFormatter->formatCurrency($total_amount, $currency));
+            $f3->set('receipt_total_tax_amount', $currencyFormatter->formatCurrency($total_tax_amount, $currency));
+            $f3->set('receipt_text', '');
 
-        $f3->set('credit_card_end', $charge->source->last4);
-        $f3->set('credit_card_type', $charge->source->brand);
+            $f3->set('credit_card_end', $charge->source->last4);
+            $f3->set('credit_card_type', $charge->source->brand);
 
-        $html = (new View)->render('../views/receipt.php');
+            $html = (new View)->render('../views/receipt.php');
 
-        $dompdf = new Dompdf();
-        $dompdf->loadHtml($html);
-        $dompdf->render();
-        file_put_contents("../receipts/receipt_{$reference_number}.pdf", $dompdf->output());
+            $dompdf = new Dompdf();
+            $dompdf->loadHtml($html);
+            $dompdf->render();
+            $filename = "../receipts/receipt_{$reference_number}.pdf";
+            file_put_contents("../receipts/receipt_{$reference_number}.pdf", $dompdf->output());
+
+
+            $mailgun = new Mailgun(getenv('MAILGUN_KEY'));
+
+            $messageBldr = $mailgun->MessageBuilder();
+            $messageBldr->setFromAddress('noreply@'.getenv('MAILGUN_DOMAIN'), array("first"=>getenv('ORG_NAME')));
+            $messageBldr->addToRecipient($member->email, array("first" => $member->name));
+            $messageBldr->setSubject(getenv('ORG_NAME').' - Receipt');
+            $messageBldr->setTextBody('Thank you! See attached file for receipt.');
+            $messageBldr->addAttachment('@/'.$filename);
+            $mailgun->post(getenv('MAILGUN_DOMAIN')."/messages", $messageBldr->getMessage(), $messageBldr->getFiles());
+
+            /*$result = $mailgun->sendMessage(getenv('MAILGUN_DOMAIN'),
+            array('from'    => getenv('ORG_NAME').' <noreply@'.getenv('MAILGUN_DOMAIN'),
+                  'to'      => $member->name.' <'.$member->email.'>',
+                  'subject' => getenv('ORG_NAME').' - Receipt',
+                  'text'    => 'Thank you! See attached file for receipt.'));*/
         }
     }
 );
