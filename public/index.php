@@ -33,7 +33,7 @@ MLogging::addHandler(new LocalFileHandler("../logs"));
 
 $f3 = \Base::instance();
 R::setup(getenv('DATABASE'),getenv('DATABASE_USER'),getenv('DATABASE_PASSWORD'));
-//R::freeze(true);
+R::freeze(true);
 
 \Stripe\Stripe::setApiKey(getenv('STRIPE_SECRET_KEY'));
 
