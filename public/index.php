@@ -115,6 +115,13 @@ $f3->route('POST /details',
 
         $member  = R::findOne( 'member', ' token = ? ', [ $_COOKIE["session"] ] );
 
+        try {
+            $cp = \Stripe\Coupon::retrieve(trim($_POST['coupon']));
+            $member->coupon = $cp->id;
+        } catch (Exception $e) {
+            $member->coupon = null;//no valid coupon
+        }
+        
         $member->organization_number = $_POST['organization_number'];
         $member->company_name = $_POST['company_name'];
         $member->phone = $_POST['phone'];
@@ -152,6 +159,7 @@ $f3->route('POST /pay',
 
             $customer = \Stripe\Customer::create(array(
                 'email' => $member->email,
+                'coupon' => !isset($member->coupon) || trim($member->coupon)==='' ? null : trim($member->coupon),
                 'source'  => $_POST['stripeToken']
             ));
 
