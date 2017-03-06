@@ -37,7 +37,7 @@ $dotenv->required(array(
 ));
 
 date_default_timezone_set(getenv('TIMEZONE'));
-MLogging::addHandler(new LocalFileHandler("../logs"));
+MLogging::addHandler(new LocalFileHandler("../logs/payment.log"));
 
 $f3 = \Base::instance();
 
