@@ -214,9 +214,9 @@ $f3->route('POST /callback',
             if ($member==null)
                 exit('no matching customer for event id '.$event->id);
 
-            //$reference_number = '1lol';//TODO: get from stripe
             $product_tax_percent = getenv('PRODUCT_TAX_PERCENT');
-            $product_tax_amount = $total_tax_amount = $charge->amount - $charge->amount*((100+$product_tax_percent)/100);
+            $amount = $charge->amount/100;
+            $product_tax_amount = $total_tax_amount = $amount - $amount/((100+$product_tax_percent)/100);
 
             $currencyFormatter = new NumberFormatter(getenv('LOCALE'), NumberFormatter::CURRENCY);
             $currency = getenv('CURRENCY_NAME');
@@ -237,12 +237,12 @@ $f3->route('POST /callback',
 
             $f3->set('product_name', getenv('PRODUCT_NAME'));
             $f3->set('product_quantity', '1');
-            $f3->set('product_cost', $currencyFormatter->formatCurrency($charge->amount, $currency));
+            $f3->set('product_cost', $currencyFormatter->formatCurrency($amount, $currency));
             $f3->set('product_tax_percent', $product_tax_percent);
             $f3->set('product_tax_amount', $currencyFormatter->formatCurrency($product_tax_amount, $currency));
 
             $f3->set('reference_number', $reference_number);
-            $f3->set('receipt_total_amount', $currencyFormatter->formatCurrency($charge->amount, $currency));
+            $f3->set('receipt_total_amount', $currencyFormatter->formatCurrency($amount, $currency));
             $f3->set('receipt_total_tax_amount', $currencyFormatter->formatCurrency($total_tax_amount, $currency));
             $f3->set('receipt_text', getenv('RECEIPT_TEXT'));
 
