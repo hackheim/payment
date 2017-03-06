@@ -208,6 +208,9 @@ $f3->route('POST /callback',
 
         // Verify the event by fetching it from Stripe
         $event = \Stripe\Event::retrieve($event_json->id);
+
+        if ($event==null)
+            exit('no matching event for event id '.$event_json->id);
 	
         minfo(json_encode($event, JSON_PRETTY_PRINT));//Log all events
         
