@@ -21,7 +21,9 @@ Customer name:          <?php echo $customer_name; ?>
 
 Customer address:       <?php echo $customer_address; ?>
 
-Customer org No:        <?php echo $customer_org_number; ?>
+Customer Company Name:  <?php echo $company_name; ?>
+
+Customer Company No:    <?php echo $customer_org_number; ?>
 
 Customer Number:        <?php echo $customer_number; ?>
 

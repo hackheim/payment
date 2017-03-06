@@ -232,6 +232,7 @@ $f3->route('POST /callback',
 
             $f3->set('customer_name', $member->name);
             $f3->set('customer_address', $member->address);
+            $f3->set('company_name', $member->company_name);
             $f3->set('customer_org_number', $member->organization_number);
             $f3->set('customer_number', $member->id);
 
