@@ -291,5 +291,11 @@ $f3->route('GET /error',
     }
 );
 
+$f3->route('GET /policy',
+    function() {
+        echo (new View)->render('../views/policy.php');
+    }
+);
+
 $f3->run();
 R::close();//Close db connection

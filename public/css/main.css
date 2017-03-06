@@ -14,9 +14,10 @@ html {
     color: #222;
     font-size: 1.2em;
     line-height: 1.4;
-    margin: 6em;
+    margin:0;
+    padding:0;
+    height:100%;
 }
-
 form {
     text-align: center;
 }
@@ -41,6 +42,27 @@ input[type=submit] {
     -webkit-border-radius: 5px;
     border-radius: 5px; 
 }
+#container {
+   min-height:100%;
+   position:relative;
+}
+#header {
+   padding:1em;
+}
+#content {
+   padding:1em;
+   padding-bottom:3em;
+}
+#footer {
+   position:relative;
+   bottom:0;
+   width:100%;
+   padding-top: 1em;
+   padding-bottom: 1em;
+   text-align: center;
+   font-size: 0.7em;
+   color:lightgrey;
+}
 
 .stripe-button-el span
 {
@@ -62,6 +84,10 @@ input[type=submit] {
 {
     color:lightgrey;
     font-size: 0.7em;
+}
+a
+{
+    color: #666;
 }
 
 /*

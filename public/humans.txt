@@ -3,13 +3,13 @@
 
 # TEAM
 
-    <name> -- <role> -- <twitter>
+    Torbjørn Kvåle -- Hacker -- tkvaale
 
 # THANKS
 
-    <name>
+    Everyone!
 
 # TECHNOLOGY COLOPHON
 
     CSS3, HTML5
-    Apache Server Configs, jQuery, Modernizr, Normalize.css
+    Nginx Server Configs, jQuery, Modernizr, Normalize.css
