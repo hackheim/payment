@@ -201,7 +201,7 @@ $f3->route('POST /callback',
         // Verify the event by fetching it from Stripe
         $event = \Stripe\Event::retrieve($event_json->id);
 	
-        minfo(json_encode($event, JSON_PRETTY_PRINT));       
+        minfo(json_encode($event, JSON_PRETTY_PRINT));//Log all events
         
     	if ($event->type === 'charge.succeeded')
     	{
@@ -209,13 +209,14 @@ $f3->route('POST /callback',
             $reference_number = $charge->id;
             $customer_id = $charge->customer;
             $member  = R::findOne('member', ' customer_id = ? ', [ $customer_id ] );
+            $time = date("Y-m-d H:i:s");
+
+            if ($member==null)
+                exit('no matching customer for event id '.$event->id);
 
             //$reference_number = '1lol';//TODO: get from stripe
-            $product_cost = getenv('PRODUCT_COST');
             $product_tax_percent = getenv('PRODUCT_TAX_PERCENT');
-            $product_tax_amount = $total_tax_amount = $product_cost*($product_tax_percent/100);
-            $total_amount = $product_cost + $product_tax_amount;
-            $product_amount = $product_cost + $product_tax_amount;
+            $product_tax_amount = $total_tax_amount = $charge->amount - $charge->amount*((100+$product_tax_percent)/100);
 
             $currencyFormatter = new NumberFormatter(getenv('LOCALE'), NumberFormatter::CURRENCY);
             $currency = getenv('CURRENCY_NAME');
@@ -226,7 +227,7 @@ $f3->route('POST /callback',
             $f3->set('tax_name', getenv('TAX_NAME'));
             $f3->set('org_number', getenv('ORG_NUMBER'));
             $f3->set('org_name', getenv('ORG_NAME'));
-            $f3->set('date_and_time', date("Y-m-d H:i:s"));
+            $f3->set('date_and_time', $time);
             
 
             $f3->set('customer_name', $member->name);
@@ -236,15 +237,14 @@ $f3->route('POST /callback',
 
             $f3->set('product_name', getenv('PRODUCT_NAME'));
             $f3->set('product_quantity', '1');
-            $f3->set('product_cost', $currencyFormatter->formatCurrency($product_amount, $currency));
-            
+            $f3->set('product_cost', $currencyFormatter->formatCurrency($charge->amount, $currency));
             $f3->set('product_tax_percent', $product_tax_percent);
             $f3->set('product_tax_amount', $currencyFormatter->formatCurrency($product_tax_amount, $currency));
 
             $f3->set('reference_number', $reference_number);
-            $f3->set('receipt_total_amount', $currencyFormatter->formatCurrency($total_amount, $currency));
+            $f3->set('receipt_total_amount', $currencyFormatter->formatCurrency($charge->amount, $currency));
             $f3->set('receipt_total_tax_amount', $currencyFormatter->formatCurrency($total_tax_amount, $currency));
-            $f3->set('receipt_text', '');
+            $f3->set('receipt_text', getenv('RECEIPT_TEXT'));
 
             $f3->set('credit_card_end', $charge->source->last4);
             $f3->set('credit_card_type', $charge->source->brand);
@@ -255,24 +255,18 @@ $f3->route('POST /callback',
             $dompdf->loadHtml($html);
             $dompdf->render();
             $filename = "../receipts/receipt_{$reference_number}.pdf";
-            file_put_contents("../receipts/receipt_{$reference_number}.pdf", $dompdf->output());
 
+            file_put_contents($filename, $dompdf->output());
 
             $mailgun = new Mailgun(getenv('MAILGUN_KEY'));
 
             $messageBldr = $mailgun->MessageBuilder();
             $messageBldr->setFromAddress('noreply@'.getenv('MAILGUN_DOMAIN'), array("first"=>getenv('ORG_NAME')));
             $messageBldr->addToRecipient($member->email, array("first" => $member->name));
-            $messageBldr->setSubject(getenv('ORG_NAME').' - Receipt');
+            $messageBldr->setSubject('Receipt '.$time);
             $messageBldr->setTextBody('Thank you! See attached file for receipt.');
             $messageBldr->addAttachment('@'.$filename);
             $mailgun->post(getenv('MAILGUN_DOMAIN')."/messages", $messageBldr->getMessage(), $messageBldr->getFiles());
-
-            /*$result = $mailgun->sendMessage(getenv('MAILGUN_DOMAIN'),
-            array('from'    => getenv('ORG_NAME').' <noreply@'.getenv('MAILGUN_DOMAIN'),
-                  'to'      => $member->name.' <'.$member->email.'>',
-                  'subject' => getenv('ORG_NAME').' - Receipt',
-                  'text'    => 'Thank you! See attached file for receipt.'));*/
         }
     }
 );

@@ -13,9 +13,8 @@
     - setup apache/nginx/etc or try it out with ´php -S localhost:8000 -t public/´
 
 ## TODO
-- [ ] All purchases need to be stored and assigned a reference number
-- [ ] Email receipts ( not sure if this is enough https://stripe.com/blog/email-receipts to fulfill norwegian laws )
-- [ ] Hook up some of the important webhooks https://stripe.com/docs/webhooks
+- [ ] All purchases need to be stored
+- [ ] Log all callbacks
 - [ ] Stop subscription https://stripe.com/docs/api#delete_customer
 - [ ] Renew payment subscription https://stripe.com/docs/recipes/updating-customer-cards
 
