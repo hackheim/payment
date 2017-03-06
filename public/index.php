@@ -265,7 +265,7 @@ $f3->route('POST /callback',
             $messageBldr->addToRecipient($member->email, array("first" => $member->name));
             $messageBldr->setSubject(getenv('ORG_NAME').' - Receipt');
             $messageBldr->setTextBody('Thank you! See attached file for receipt.');
-            $messageBldr->addAttachment('@/'.$filename);
+            $messageBldr->addAttachment('@'.$filename);
             $mailgun->post(getenv('MAILGUN_DOMAIN')."/messages", $messageBldr->getMessage(), $messageBldr->getFiles());
 
             /*$result = $mailgun->sendMessage(getenv('MAILGUN_DOMAIN'),
