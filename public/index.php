@@ -134,9 +134,6 @@ $f3->route('POST /details',
         if (!v::optional(v::numeric()->length(9))->validate($organization_number))
             $errors['organization_number']  = "Wrong!";
 
-        if (!v::optional(v::numeric()->length(9))->validate($company_name))
-            $errors['company_name'] = "Wrong!";
-
         if (sizeof($errors)>0)
         {
             $f3->set('errors', $errors);

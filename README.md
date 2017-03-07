@@ -13,7 +13,6 @@
     - setup apache/nginx/etc or try it out with ´php -S localhost:8000 -t public/´
 
 ## TODO
-- [ ] Better validation
 - [ ] Allow to log in existing user
 - [ ] Stop subscription https://stripe.com/docs/api#delete_customer
 - [ ] Renew payment subscription https://stripe.com/docs/recipes/updating-customer-cards
