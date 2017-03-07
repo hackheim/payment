@@ -193,11 +193,11 @@ $f3->route('POST /pay',
             minfo(json_encode($customer, JSON_PRETTY_PRINT));
 
             $member->name = substr($_POST['stripeBillingName'], 0, 254);
-            $member->address = substr($_POST['stripeBillingAddressLine1']);
-            $member->zip = substr($_POST['stripeBillingAddressZip']);
-            $member->state = substr($_POST['stripeBillingAddressState']);
-            $member->city = substr($_POST['stripeBillingAddressCity']);
-            $member->country = substr($_POST['stripeBillingAddressCountry']);
+            $member->address = substr($_POST['stripeBillingAddressLine1'], 0, 254);
+            $member->zip = substr($_POST['stripeBillingAddressZip'], 0, 254);
+            $member->state = substr($_POST['stripeBillingAddressState'], 0, 254);
+            $member->city = substr($_POST['stripeBillingAddressCity'], 0, 254);
+            $member->country = substr($_POST['stripeBillingAddressCountry'], 0, 254);
             $member->customer_id = $customer->id;
 
             R::store($member);
