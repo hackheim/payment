@@ -85,6 +85,11 @@ input[type=submit] {
     color:lightgrey;
     font-size: 0.7em;
 }
+.companyname
+{
+    color:lightgrey;
+}
+
 a
 {
     color: #666;
