@@ -109,26 +109,50 @@ $f3->route('GET /details',
 );
 
 $f3->route('POST /details',
-    function() {
+    function($f3) {
         if (!is_user_logged_in())
             header('Location: error');
-
+        $errors = array();
         $member  = R::findOne( 'member', ' token = ? ', [ $_COOKIE["session"] ] );
 
-        try {
-            $cp = \Stripe\Coupon::retrieve(trim($_POST['coupon']));
-            $member->coupon = $cp->id;
-        } catch (Exception $e) {
-            $member->coupon = null;//no valid coupon
-        }
+        if (strlen(trim($_POST['coupon']))>0)
+            try {
+                $cp = \Stripe\Coupon::retrieve($_POST['coupon']);
+                $member->coupon = $cp->id;
+            } catch (Exception $e) {
+                $errors['coupon'] = "Wrong!";
+            }
         
-        $member->organization_number = $_POST['organization_number'];
-        $member->company_name = $_POST['company_name'];
-        $member->phone = $_POST['phone'];
 
-        R::store($member);
+        $phone = preg_replace('![^\d+]+!', '', $_POST['phone']);
+        $organization_number = preg_replace('![^\d]+!', '', $_POST['organization_number']);
+        $company_name = preg_replace('![^a-zA-Z0-9æøåÆØÅ\-&() ]+!', '', $_POST['company_name']);
 
-        header('Location: payment_form');
+        if (!v::startsWith('+')->length(11, 12)->validate($phone))
+            $errors['phone'] = "Wrong!";
+
+        if (!v::optional(v::numeric()->length(9))->validate($organization_number))
+            $errors['organization_number']  = "Wrong!";
+
+        if (!v::optional(v::numeric()->length(9))->validate($company_name))
+            $errors['company_name'] = "Wrong!";
+
+        if (sizeof($errors)>0)
+        {
+            $f3->set('errors', $errors);
+            echo (new View)->render('../views/details.php');
+
+        }
+        else
+        {
+            $member->organization_number = $organization_number;
+            $member->company_name = $company_name;
+            $member->phone = $phone;
+
+            R::store($member);
+
+            header('Location: payment_form');
+        }
     }
 );
 
@@ -171,12 +195,12 @@ $f3->route('POST /pay',
 
             minfo(json_encode($customer, JSON_PRETTY_PRINT));
 
-            $member->name = $_POST['stripeBillingName'];
-            $member->address = $_POST['stripeBillingAddressLine1'];
-            $member->zip = $_POST['stripeBillingAddressZip'];
-            $member->state = $_POST['stripeBillingAddressState'];
-            $member->city = $_POST['stripeBillingAddressCity'];
-            $member->country = $_POST['stripeBillingAddressCountry'];
+            $member->name = substr($_POST['stripeBillingName'], 0, 254);
+            $member->address = substr($_POST['stripeBillingAddressLine1']);
+            $member->zip = substr($_POST['stripeBillingAddressZip']);
+            $member->state = substr($_POST['stripeBillingAddressState']);
+            $member->city = substr($_POST['stripeBillingAddressCity']);
+            $member->country = substr($_POST['stripeBillingAddressCountry']);
             $member->customer_id = $customer->id;
 
             R::store($member);
