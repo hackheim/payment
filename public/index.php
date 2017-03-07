@@ -89,6 +89,8 @@ $f3->route('POST /check_email',
             {
                 //TODO: send email with tokenurl for user to log in
                 echo "Existing user! login not implemented yet";
+
+                //if phone is not set, send to details, if it is send to payment_form
             }
         }
         else
@@ -132,7 +134,7 @@ $f3->route('POST /details',
             $errors['phone'] = "Wrong!";
 
         if (!v::optional(v::numeric()->length(9))->validate($organization_number))
-            $errors['organization_number']  = "Wrong!";
+            $errors['organization_number'] = "Wrong!";
 
         if (sizeof($errors)>0)
         {
@@ -159,7 +161,23 @@ $f3->route('GET /payment_form',
         {
             $member  = R::findOne('member', ' token = ? ', [ $_COOKIE["session"] ] );
             $f3->set('email', $member->email);
-            $f3->set('cost', getenv('PRODUCT_COST')+getenv('PRODUCT_COST')*(getenv('PRODUCT_TAX_PERCENT')/100));
+            $f3->set('anycards', $member->customer_id!=null && strlen($member->customer_id)>0);
+
+
+            $price = getenv('PRODUCT_COST')+getenv('PRODUCT_COST')*(getenv('PRODUCT_TAX_PERCENT')/100);
+
+            if ($member->coupon!=null && strlen($member->coupon)>0)
+                try {
+                    $cp = \Stripe\Coupon::retrieve($member->coupon);
+                    if ($cp->amount_off!=null)
+                        $price -= ($cp->amount_off+$cp->amount_off*(getenv('PRODUCT_TAX_PERCENT')/100))/100;
+                    else
+                        $price = $price - $price*($cp->percent_off/100);
+
+                } catch (Exception $e) {
+                }
+
+            $f3->set('cost', $price);
             
             echo (new View)->render('../views/paymentform.php');
         }
@@ -178,19 +196,34 @@ $f3->route('POST /pay',
 
             $member  = R::findOne('member', ' token = ? ', [ $_COOKIE["session"] ] );
 
-            $customer = \Stripe\Customer::create(array(
-                'email' => $member->email,
-                'coupon' => !isset($member->coupon) || trim($member->coupon)==='' ? null : trim($member->coupon),
-                'source'  => $_POST['stripeToken']
-            ));
+            if ($member->customer_id==null || $member->customer_id=='')
+            {
+                $customer = \Stripe\Customer::create(array(
+                    'email' => $member->email,
+                    'coupon' => !isset($member->coupon) || trim($member->coupon)==='' ? null : trim($member->coupon),
+                    'source'  => $_POST['stripeToken']
+                ));
 
-            \Stripe\Subscription::create(array(
-              "customer" => $customer->id,
-              "plan" => getenv('STRIPE_PLAN_NAME'),
-              "tax_percent" => getenv('PRODUCT_TAX_PERCENT'),
-            ));
+                $member->customer_id = $customer->id;
+            }
+            else
+            {
+                $customer = \Stripe\Customer::retrieve($member->customer_id);
+                $card = $customer->sources->create(array("source" => $_POST['stripeToken']));
+                $customer->default_source = $card->id;
+                $customer->save();
+               
+                $subscriptions = \Stripe\Subscription::all(array('customer'=>$member->customer_id));
+            }
 
             minfo(json_encode($customer, JSON_PRETTY_PRINT));
+
+            if ($subscriptions==null || sizeof($subscriptions->data)==0)
+                \Stripe\Subscription::create(array(
+                  "customer" => $customer->id,
+                  "plan" => getenv('STRIPE_PLAN_NAME'),
+                  "tax_percent" => getenv('PRODUCT_TAX_PERCENT'),
+                ));
 
             $member->name = substr($_POST['stripeBillingName'], 0, 254);
             $member->address = substr($_POST['stripeBillingAddressLine1'], 0, 254);
@@ -198,7 +231,7 @@ $f3->route('POST /pay',
             $member->state = substr($_POST['stripeBillingAddressState'], 0, 254);
             $member->city = substr($_POST['stripeBillingAddressCity'], 0, 254);
             $member->country = substr($_POST['stripeBillingAddressCountry'], 0, 254);
-            $member->customer_id = $customer->id;
+            
 
             R::store($member);
 

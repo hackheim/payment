@@ -1,8 +1,12 @@
-# Hackheim Hackespace Member Managment
+# A Minimal Recurring Payment Solution 
+
+Using stripe as payment gateway
 
 ## Requirements
 
 - Composer. Install Composer with ´curl -sS https://getcomposer.org/installer | php´ https://getcomposer.org/download/
+- stripe account
+- mailgun account
 
 ## Getting Started
 
@@ -13,7 +17,9 @@
     - setup apache/nginx/etc or try it out with ´php -S localhost:8000 -t public/´
 
 ## TODO
+- [ ] Migrate users from old table
 - [ ] Allow to log in existing user
+- [ ] Free trial until date X depending on earlier payment
 - [ ] Stop subscription https://stripe.com/docs/api#delete_customer
 - [ ] Renew payment subscription https://stripe.com/docs/recipes/updating-customer-cards
 

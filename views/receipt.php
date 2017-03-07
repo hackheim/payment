@@ -36,7 +36,7 @@ Quantity:               <?php echo $product_quantity; ?>
 
 Price:                  <?php echo $product_cost; ?> <?php echo $currency_name; ?>
 
-<?php echo $tax_name; ?> <?php echo $product_tax_percent; ?>%:                <?php echo $product_tax_amount; ?> <?php echo $currency_name; ?>
+Of which <?php echo $tax_name; ?> <?php echo $product_tax_percent; ?>%:       <?php echo $product_tax_amount; ?> <?php echo $currency_name; ?>
 
 </pre>
 
