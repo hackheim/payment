@@ -362,9 +362,20 @@ $f3->route('POST /callback',
             $dompdf = new Dompdf();
             $dompdf->loadHtml($html);
             $dompdf->render();
-            $filename = "../receipts/receipt_{$reference_number}.pdf";
 
-            file_put_contents($filename, $dompdf->output());
+            $filename = "receipt_{$reference_number}.pdf";
+            $filepath = "../receipts/".$filename;
+
+            $stripe_charge = R::dispense('stripe_charge');
+            $stripe_charge->member_id = $member->id;
+            $stripe_charge->charge_id = $charge->id;
+            $stripe_charge->amount = $charge->amount;
+            $stripe_charge->amount_refunded = $charge->amount_refunded;
+            $stripe_charge->filename = $filename;
+            $stripe_charge->time = $time;
+            R::store($stripe_charge);
+
+            file_put_contents($filepath, $dompdf->output());
 
             $mailgun = new Mailgun(getenv('MAILGUN_KEY'));
 
@@ -373,7 +384,7 @@ $f3->route('POST /callback',
             $messageBldr->addToRecipient($member->email, array("first" => $member->name));
             $messageBldr->setSubject('Receipt '.$time);
             $messageBldr->setTextBody('Thank you! See attached file for receipt.');
-            $messageBldr->addAttachment('@'.$filename);
+            $messageBldr->addAttachment('@'.$filepath);
             $mailgun->post(getenv('MAILGUN_DOMAIN')."/messages", $messageBldr->getMessage(), $messageBldr->getFiles());
         }
     }
