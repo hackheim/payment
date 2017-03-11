@@ -35,8 +35,8 @@ server {
     
     root /home/payment/production/public;
     index index.php index.html index.htm;
-
-    try_files $uri $uri/ /index.php;
+    
+    try_files $uri $uri/ /index.php?$args;
 
     location ~ \.php {
         try_files $uri =403;
