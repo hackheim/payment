@@ -1,6 +1,7 @@
 <?php include 'top.php'; ?>
 
 <form action="/details" method="POST">
+  <?= \Volnix\CSRF\CSRF::getHiddenInputString() ?>
   <h1>Great! Let us know some basic stuff</h1>
   <label for="phone" class="<?php echo isset($errors['phone']) ? 'error' : ''; ?>">Phone</label><br />
   <input type="text" name="phone" value="+47"><br />

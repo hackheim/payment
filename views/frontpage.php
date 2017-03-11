@@ -17,6 +17,7 @@
 <p class="error"><?php echo $error_email; ?></p>
 <?php } ?>
 <form action="/check_email" method="POST">
+    <?= \Volnix\CSRF\CSRF::getHiddenInputString() ?>
     <label for="email">Enter e-mail to continue:</label>
     <input type="email" name="email">
     <input type="submit" value="Log in" />

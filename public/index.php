@@ -3,6 +3,7 @@ error_reporting(0);
 
 require '../vendor/autoload.php';
 
+use Volnix\CSRF\CSRF as CSRF;
 use Dompdf\Dompdf;
 use Oasis\Mlib\Logging\ConsoleHandler;
 use Oasis\Mlib\Logging\LocalFileHandler;
@@ -10,6 +11,8 @@ use Oasis\Mlib\Logging\MLogging;
 use Respect\Validation\Validator as v;
 use Mailgun\Mailgun;
 
+session_set_cookie_params(time()+3600*24, '/', getenv('DOMAIN'), getenv('SECURE_COOKIE')==='true', true);
+session_start();// for CSRF
 
 $dotenv = new Dotenv\Dotenv('../');
 $dotenv->load();
@@ -70,8 +73,8 @@ $f3->route('GET /',
 $f3->route('POST /check_email',
     function($f3) {
         $email = filter_var($_POST['email'], FILTER_SANITIZE_EMAIL);
-        
-        if (v::email()->validate($email))
+
+        if (v::email()->validate($email) && CSRF::validate($_POST))
         {
             $member  = R::findOne('member', ' email = ? ', [ $email ] );
 
@@ -80,6 +83,7 @@ $f3->route('POST /check_email',
                 $member = R::dispense('member');
                 $member->email = $email;
                 $member->token = bin2hex(openssl_random_pseudo_bytes(64));
+                $member->token_timeout = (new DateTime())->add(new DateInterval('PT60M'));
                 $id = R::store($member);
 
                 setcookie("session", $member->token, time()+3600*24, '/', getenv('DOMAIN'), getenv('SECURE_COOKIE')==='true', true);
@@ -127,6 +131,7 @@ $f3->route('GET /login_by_token',
         if ($member != null && new DateTime($member->token_timeout) >= new DateTime())
         {
             $member->token = bin2hex(openssl_random_pseudo_bytes(64));
+            $member->token_timeout = (new DateTime())->add(new DateInterval('PT60M'));
             R::store($member);
             setcookie("session", $member->token, time()+3600*24, '/', getenv('DOMAIN'), getenv('SECURE_COOKIE')==='true', true);
 
@@ -153,7 +158,7 @@ $f3->route('GET /details',
 
 $f3->route('POST /details',
     function($f3) {
-        if (!is_user_logged_in())
+        if (!is_user_logged_in() && CSRF::validate($_POST))
             header('Location: error');
         $errors = array();
         $member  = R::findOne( 'member', ' token = ? ', [ $_COOKIE["session"] ] );
@@ -232,7 +237,7 @@ $f3->route('POST /pay',
     function() {
         try
         {
-            if (!is_user_logged_in())
+            if (!is_user_logged_in() && CSRF::validate($_POST))
                 header('Location: error');
 
             $member  = R::findOne('member', ' token = ? ', [ $_COOKIE["session"] ] );

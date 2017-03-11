@@ -5,6 +5,7 @@
 <p class="info">There is a card registered for <?php echo $email; ?>. Replace it?</p>
 <?php } ?>
 <form action="/pay" method="POST">
+  <?= \Volnix\CSRF\CSRF::getHiddenInputString() ?>
   <script
     src="https://checkout.stripe.com/checkout.js" class="stripe-button"
     data-key="<?php echo getenv('STRIPE_PUBLIC_KEY'); ?>"
