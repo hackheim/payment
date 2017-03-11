@@ -366,7 +366,7 @@ $f3->route('POST /callback',
             $filename = "receipt_{$reference_number}.pdf";
             $filepath = "../receipts/".$filename;
 
-            $stripe_charge = R::dispense('stripe_charge');
+            $stripe_charge = R::dispense('stripecharge');
             $stripe_charge->member_id = $member->id;
             $stripe_charge->charge_id = $charge->id;
             $stripe_charge->amount = $charge->amount;
