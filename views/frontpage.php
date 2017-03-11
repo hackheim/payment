@@ -21,5 +21,5 @@
     <input type="email" name="email">
     <input type="submit" value="Log in" />
 </form>
-
+<p class="info" style="color:grey;font-size: 0.7em">If you want to stop the subscription, send us an email at <a href="mailto:hackheim@hackheim.no">hackheim@hackheim.no<a/></p>
 <?php include 'bottom.php'; ?>

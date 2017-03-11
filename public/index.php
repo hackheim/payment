@@ -33,7 +33,8 @@ $dotenv->required(array(
     'DOMAIN',
     'SECURE_COOKIE',
     'MAILGUN_KEY',
-    'MAILGUN_DOMAIN'
+    'MAILGUN_DOMAIN',
+    'URL'
 ));
 
 date_default_timezone_set(getenv('TIMEZONE'));
@@ -87,16 +88,57 @@ $f3->route('POST /check_email',
             }
             else
             {
-                //TODO: send email with tokenurl for user to log in
-                echo "Existing user! login not implemented yet";
+                $member->token = bin2hex(openssl_random_pseudo_bytes(64));
+                //TODO: set token_timeout
+                R::store($member);
+                
+                $url = getenv('URL')."login_by_token?token=".$member->token;
 
-                //if phone is not set, send to details, if it is send to payment_form
+                $mailgun = new Mailgun(getenv('MAILGUN_KEY'));
+                $messageBldr = $mailgun->MessageBuilder();
+                $messageBldr->setFromAddress('noreply@'.getenv('MAILGUN_DOMAIN'), array("first"=>getenv('ORG_NAME')));
+                $messageBldr->addToRecipient($member->email, array("first" => $member->name));
+                $messageBldr->setSubject('Login URL');
+                $messageBldr->setTextBody($url);
+                $mailgun->post(getenv('MAILGUN_DOMAIN')."/messages", $messageBldr->getMessage());
+
+                $f3->set('info', "An email with a login URL will soon arrive");
+            
+                echo (new View)->render('../views/info.php');
             }
         }
         else
         {
             $f3->set('error_email', "Email not valid");
             echo (new View)->render('../views/frontpage.php');
+        }
+    }
+);
+
+$f3->route('GET /login_by_token',
+    function($f3) {
+        if (!isset($_GET['token']) || strlen($_GET['token'])==0)
+            header('Location: error');
+
+        $token = $_GET['token'];
+
+        $member  = R::findOne('member', ' token = ? ', [ $_GET['token'] ] );
+
+        if ($member != null)
+        {
+            //TODO: check token_timeout
+            $member->token = bin2hex(openssl_random_pseudo_bytes(64));
+            R::store($member);
+            setcookie("session", $member->token, time()+3600*24, '/', getenv('DOMAIN'), getenv('SECURE_COOKIE')==='true', true);
+
+            if ($member->phone!=null && strlen($member->phone)>0)
+                header('Location: payment_form');
+            else
+                header('Location: details');
+        }
+        else
+        {
+            header('Location: error');
         }
     }
 );

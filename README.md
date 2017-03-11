@@ -17,19 +17,17 @@ Using stripe as payment gateway
     - setup apache/nginx/etc or try it out with ´php -S localhost:8000 -t public/´
 
 ## TODO
-- [ ] Migrate users from old table
-- [ ] Allow to log in existing user
+- [ ] Save stripe charges
 - [ ] Free trial until date X depending on earlier payment
-- [ ] Stop subscription https://stripe.com/docs/api#delete_customer
-- [ ] Renew payment subscription https://stripe.com/docs/recipes/updating-customer-cards
+- [ ] Hide the NGINX 5xx error page
+- [ ] Add CSRF security
+- [ ] Add timeout on the token
 
 ## Migrations
 
 This is how a migration is created and executed:
 
-    # Enter the vagrant box
-    vagrant ssh
-    cd /var/www/src
+    # In source root folder:
     php vendor/bin/phinx create SomeChangeYouWantToDo
     # Edit it
     # Run it:
