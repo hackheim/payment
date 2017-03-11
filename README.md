@@ -17,7 +17,6 @@ Using stripe as payment gateway
     - setup apache/nginx/etc or try it out with ´php -S localhost:8000 -t public/´
 
 ## TODO
-- [ ] Add CSRF security
 - [ ] Fiken integration
 - [ ] Maybe handle stripe "charge.refunded" event?
 - [ ] Add DB backup solution

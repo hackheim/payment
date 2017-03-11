@@ -28,6 +28,6 @@ class AddTokenTimeout extends AbstractMigration
     public function change()
     {
         $table = $this->table('member');
-        $table->addColumn('token_timeout', 'datetime')->update();
+        $table->addColumn('token_timeout', 'datetime', array('null' => true))->update();
     }
 }
