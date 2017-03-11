@@ -17,11 +17,10 @@ Using stripe as payment gateway
     - setup apache/nginx/etc or try it out with ´php -S localhost:8000 -t public/´
 
 ## TODO
-- [ ] Free trial until date X depending on earlier payment
-- [ ] Hide the NGINX 5xx error page
 - [ ] Add CSRF security
 - [ ] Add timeout on the token
 - [ ] Fiken integration
+- [ ] Maybe handle stripe "charge.refunded" event?
 
 ## Migrations
 
