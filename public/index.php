@@ -55,7 +55,7 @@ function is_user_logged_in()
 
     $member  = R::findOne('member', ' token = ? ', [ $_COOKIE["session"] ] );
 
-    if ($member==null)
+    if ($member==null || new DateTime($member->token_timeout) < new DateTime())
         return false;
 
     return true;
@@ -89,7 +89,7 @@ $f3->route('POST /check_email',
             else
             {
                 $member->token = bin2hex(openssl_random_pseudo_bytes(64));
-                //TODO: set token_timeout
+                $member->token_timeout = (new DateTime())->add(new DateInterval('PT60M'));
                 R::store($member);
                 
                 $url = getenv('URL')."login_by_token?token=".$member->token;
@@ -124,9 +124,8 @@ $f3->route('GET /login_by_token',
 
         $member  = R::findOne('member', ' token = ? ', [ $_GET['token'] ] );
 
-        if ($member != null)
+        if ($member != null && new DateTime($member->token_timeout) >= new DateTime())
         {
-            //TODO: check token_timeout
             $member->token = bin2hex(openssl_random_pseudo_bytes(64));
             R::store($member);
             setcookie("session", $member->token, time()+3600*24, '/', getenv('DOMAIN'), getenv('SECURE_COOKIE')==='true', true);

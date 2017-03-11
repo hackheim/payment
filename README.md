@@ -18,9 +18,9 @@ Using stripe as payment gateway
 
 ## TODO
 - [ ] Add CSRF security
-- [ ] Add timeout on the token
 - [ ] Fiken integration
 - [ ] Maybe handle stripe "charge.refunded" event?
+- [ ] Add DB backup solution
 
 ## Migrations
 
@@ -43,3 +43,11 @@ This is how a migration is created and executed:
 - https://www.linode.com/docs/websites/nginx/nginx-ssl-and-tls-deployment-best-practices
 - https://cipherli.st/
 
+## Checklist when moving from test to production
+- Update stripe callback. Remove test and add production callback
+- Check that test coupons exists in prod
+- Check that test plans exists in prod
+- Delete receipt files
+- Clear logs
+- Empty DB and/or fill prefill with legacy data
+- Switch to stripe production keys
