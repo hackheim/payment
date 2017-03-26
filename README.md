@@ -19,7 +19,10 @@ Using stripe as payment gateway
 ## TODO
 - [ ] Fiken integration
 - [ ] Maybe handle stripe "charge.refunded" event?
-- [ ] Add DB backup solution
+- [ ] Add DB and receipts backup solution
+- [ ] Avvoid that payment errors create multiple customers when registering
+- [ ] Update valid_until end date
+- [ ] Show price on frontpage
 
 ## Migrations
 
