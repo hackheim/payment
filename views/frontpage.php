@@ -1,17 +1,20 @@
 <?php include 'top.php'; ?>
 
-<div style="width: 600px; margin-left: auto; margin-right: auto">
-    <h1>Join us</h1>
+<div style="font-size:0.9em;width: 600px; margin-left: auto; margin-right: auto;">
+    <img style="width:300px" src="img/logo.png"/>
+    <h1>Buy 24/7 ALL ACCESS!</h1>
 
-    <h3>Hva får du?<h3>
+    <h3>Aside from an awesome social meeting point, this is some of the great benefits you get:<h3>
 
     <ul>
-        <li>Gir deg tilgang til lokalene våre på work-work</li>
-        <li>Et utvalg verktøy</li>
-        <li>Mulighet til å dra nytte av de mange fasilitetene på work-work</li>
-        <li>Rabatt i kafèen</li>
-        <li>Støtt Trondheim sitt kuleste community</li>
+        <li>24/7 access to our premises at work-work</li>
+        <li>Opportunity to use a great variety of tools and machines</li>
+        <li>Ability to benefit from the many facilities at work-work</li>
+        <li>Discount in the café</li>
+        <li>Support one of the best maker communities in the area</li>
     </ul>
+    <div style="padding: 10px">Price per month <?php echo $cost; ?> ,- inkl. <?php echo getenv('TAX_NAME'); ?></div>
+    <div style="padding: 10px;font-size: 0.7em">(full time students and work-work only kr 250,-)</div>
 </div>
 <?php if (isset($error_email)) { ?>
 <p class="error"><?php echo $error_email; ?></p>

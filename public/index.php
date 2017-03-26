@@ -65,7 +65,10 @@ function is_user_logged_in()
 }
 
 $f3->route('GET /',
-    function() {
+    function($f3) {
+        $price = getenv('PRODUCT_COST')+getenv('PRODUCT_COST')*(getenv('PRODUCT_TAX_PERCENT')/100);
+        $f3->set('cost', $price);
+
         echo (new View)->render('../views/frontpage.php');
     }
 );
