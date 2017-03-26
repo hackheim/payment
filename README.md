@@ -21,7 +21,6 @@ Using stripe as payment gateway
 - [ ] Maybe handle stripe "charge.refunded" event?
 - [ ] Add DB and receipts backup solution
 - [ ] Avvoid that payment errors create multiple customers when registering
-- [ ] Update valid_until end date
 
 ## Migrations
 

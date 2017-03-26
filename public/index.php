@@ -393,6 +393,11 @@ $f3->route('POST /callback',
             $messageBldr->setTextBody('Thank you! See attached file for receipt.');
             $messageBldr->addAttachment('@'.$filepath);
             $mailgun->post(getenv('MAILGUN_DOMAIN')."/messages", $messageBldr->getMessage(), $messageBldr->getFiles());
+
+
+
+            $member->valid_until = (new DateTime($time))->add(new DateInterval('P1M'));
+            R::store($member);
         }
     }
 );

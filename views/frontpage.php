@@ -13,7 +13,7 @@
         <li>Discount in the café</li>
         <li>Support one of the best maker communities in the area</li>
     </ul>
-    <div style="padding: 10px">Price per month <?php echo $cost; ?> ,- inkl. <?php echo getenv('TAX_NAME'); ?></div>
+    <div style="padding: 10px">Price per month <?php echo $cost; ?> ,- incl. <?php echo getenv('TAX_NAME'); ?></div>
     <div style="padding: 10px;font-size: 0.7em">( full time students and work-work peons, only kr 250,- )</div>
 </div>
 <?php if (isset($error_email)) { ?>
