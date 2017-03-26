@@ -9,12 +9,12 @@
     <ul>
         <li>24/7 access to our premises at work-work</li>
         <li>Opportunity to use a great variety of tools and machines</li>
-        <li>Ability to benefit from the many facilities at work-work</li>
+        <li>Benefit from the many facilities at work-work</li>
         <li>Discount in the café</li>
         <li>Support one of the best maker communities in the area</li>
     </ul>
     <div style="padding: 10px">Price per month <?php echo $cost; ?> ,- inkl. <?php echo getenv('TAX_NAME'); ?></div>
-    <div style="padding: 10px;font-size: 0.7em">(full time students and work-work only kr 250,-)</div>
+    <div style="padding: 10px;font-size: 0.7em">( full time students and work-work peons, only kr 250,- )</div>
 </div>
 <?php if (isset($error_email)) { ?>
 <p class="error"><?php echo $error_email; ?></p>
