@@ -1,4 +1,10 @@
 <?php include 'top.php'; ?>
+
+<?php if ($admin) { ?>
+<p><a href="admin">Admin: Payments list</a></p>
+<?php } ?>
+
+
 <?php if (!$anycards) { ?>
 <p class="info">Currently no payment methods registered for <?php echo $email; ?>. Time to do something about it!</p>
 <?php } else { ?>

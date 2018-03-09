@@ -17,10 +17,16 @@ Using stripe as payment gateway
     - setup apache/nginx/etc or try it out with ´php -S localhost:8000 -t public/´
 
 ## TODO
-- [ ] Fiken integration
+
 - [ ] Maybe handle stripe "charge.refunded" event?
 - [ ] Add DB and receipts backup solution
 - [ ] Avvoid that payment errors create multiple customers when registering
+
+## Fiken setup
+
+- Create account 1578  for Stripe transit account and a Stripe supplier contact
+- FIKEN_COMPANY env setting should be the same as your name used in urls at fiken "your-name-as"
+- Password and email is a regular user login
 
 ## Migrations
 

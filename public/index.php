@@ -210,6 +210,7 @@ $f3->route('GET /payment_form',
         {
             $member  = R::findOne('member', ' token = ? ', [ $_COOKIE["session"] ] );
             $f3->set('email', $member->email);
+            $f3->set('admin', $member->admin);
             $f3->set('anycards', $member->customer_id!=null && strlen($member->customer_id)>0);
 
 
@@ -399,6 +400,143 @@ $f3->route('POST /callback',
             $member->valid_until = (new DateTime($time))->add(new DateInterval('P1M'));
             R::store($member);
         }
+    }
+);
+
+$f3->route('GET /admin',
+    function($f3) {
+        $member  = R::findOne('member', ' token = ? ', [ $_COOKIE["session"] ] );
+
+        if (!is_user_logged_in() || !$member->admin)
+            header('Location: error');
+
+        $contacts_to_add  = R::find('member', ' fiken_customer_id is null and valid_until is not null limit 100');
+        $f3->set('contacts', $contacts_to_add);
+
+        $stripecharges  = R::find('stripecharge', ' fiken_transaction is null');
+        $f3->set('stripecharges', $stripecharges);
+
+        echo (new View)->render('../views/admin.php');
+    }
+);
+
+$f3->route('GET /updatecontacts',
+    function($f3) {
+        $member  = R::findOne('member', ' token = ? ', [ $_COOKIE["session"] ] );
+
+        if (!is_user_logged_in() || !$member->admin)
+            header('Location: error');
+
+        $client = new GuzzleHttp\Client();
+        //https://fiken.no/api/doc/#create-general-journal-entry-service
+
+        $members  = R::find('member', ' fiken_customer_id is null and valid_until is not null limit 100');
+
+        $base = 'https://fiken.no/api/v1/companies/'.getenv('FIKEN_COMPANY');
+        $auth = [getenv('FIKEN_EMAIL'), getenv('FIKEN_PASSWORD')];
+
+
+        foreach ($members as $member)
+        {
+            $res = $client->request('POST', $base.'/contacts', ['auth' => $auth, 'json' => 
+                [
+                    'name' => $member->name,
+                    'email' => $member->email,
+                    'phoneNumber' => $member->phone,
+                    'memberNumber' => $member->id,
+                    'language' => 'ENGLISH',
+                    'organizationIdentifier' => $member->organization_number,
+                    'address' => [
+                        'postalCode' => $member->zip,
+                        'postalPlace' => $member->city,
+                        'address1' => $member->address,
+                    ],
+                    'customer' => true
+                ]]);
+            
+            $fiken_contact = json_decode($client->request('GET', 
+                                            $res->getHeader('location')[0], 
+                                            ['auth' => $auth])->getBody());
+
+            minfo(json_encode($fiken_contact, JSON_PRETTY_PRINT));
+
+            $member->fiken_customer_id = $fiken_contact->customerNumber;
+            R::store($member);
+        }
+
+       header('Location: admin');
+    }
+);
+
+$f3->route('GET /uploadreceipts',
+    function($f3) {
+        $member  = R::findOne('member', ' token = ? ', [ $_COOKIE["session"] ] );
+
+        if (!is_user_logged_in() || !$member->admin)
+            header('Location: error');
+
+        $client = new GuzzleHttp\Client();
+
+        $stripecharges  = R::find('stripecharge', ' fiken_transaction is null');
+
+        $base = 'https://fiken.no/api/v1/companies/'.getenv('FIKEN_COMPANY');
+        $auth = [getenv('FIKEN_EMAIL'), getenv('FIKEN_PASSWORD')];
+
+
+        foreach ($stripecharges as $charge)
+        {
+            $res = $client->request('POST', $base.'/createGeneralJournalEntriesService', ['auth' => $auth, 'json' => 
+                [
+                  "description" => "Stripe charge: ".$charge->member->name.
+                                    " https://dashboard.stripe.com/payments/".$charge->charge_id,
+                  "journalEntries" => [
+                        [
+                            "description" => "Stripe: ".$charge->member->name." (".$charge->charge_id.")",
+                            "date" => date('Y-m-d', strtotime($charge->time)),
+                            "lines" => [
+                                [
+                                    "debit" => $charge->amount,
+                                    "debitAccount" => "1578",
+                                    "creditAccount" => "1500:".$charge->member->fiken_customer_id,
+                                ],
+                                [
+                                    "debit" => $charge->amount,
+                                    "debitAccount" => "1500:".$charge->member->fiken_customer_id,
+                                    "creditAccount" => "3000",
+                                    "creditVatCode" => 3
+                                ]
+                            ]
+                        ]
+                    ]
+                ]
+            ]);
+            
+            $journal = json_decode($client->request('GET', 
+                                            $res->getHeader('location')[0], 
+                                            ['auth' => $auth])->getBody());
+
+            minfo(json_encode($journal, JSON_PRETTY_PRINT));
+
+            $charge->fiken_transaction = $journal->_links->self->href;
+            R::store($charge);
+
+            $filepath = "../receipts/".$charge->filename;
+            $client->request('POST', $journal->entries[0]->_links->{'https://fiken.no/api/v1/rel/attachments'}->href, [
+                'auth' => $auth,
+                'multipart' => [
+                    [
+                        'name'     => 'AttachmentFile',
+                        'contents' => fopen($filepath, 'r')
+                    ],
+                    [
+                        'name'     => 'JournalAttachment',
+                        'contents' => '{"filename":"'.$charge->filename.'"}'
+                    ]
+                ]
+            ]);
+        }
+
+        header('Location: admin');
     }
 );
 
