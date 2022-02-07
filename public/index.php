@@ -10,6 +10,7 @@ use Oasis\Mlib\Logging\LocalFileHandler;
 use Oasis\Mlib\Logging\MLogging;
 use Respect\Validation\Validator as v;
 use Mailgun\Mailgun;
+use \RedBeanPHP\R as R;
 
 session_set_cookie_params(time()+3600*24, '/', getenv('DOMAIN'), getenv('SECURE_COOKIE')==='true', true);
 session_start();// for CSRF
