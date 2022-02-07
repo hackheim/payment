@@ -8,14 +8,6 @@
             "email": "hackheim@hackheim.no"
         }
     ],
-    "config": {
-        "secure-http": false 
-    },
-    "autoload": {
-        "files": [
-            "vendor/redbeanphp/rb.php"
-        ]
-    },
     "require": {
         "bcosca/fatfree-core": "dev-master",
         "gabordemooij/redbean": "dev-master",
