@@ -17,11 +17,7 @@ session_start();// for CSRF
 $dotenv = new Dotenv\Dotenv('../');
 $dotenv->load();
 $dotenv->required(array(
-    'PHINX_DBTYPE',
-    'PHINX_DBHOST', 
-    'PHINX_DBNAME',
-    'PHINX_DBUSER', 
-    'PHINX_DBPASS',
+    'DATABASE_URL',
     'STRIPE_SECRET_KEY',
     'STRIPE_PUBLIC_KEY',
     'STRIPE_PLAN_NAME', 
@@ -46,7 +42,7 @@ MLogging::addHandler(new LocalFileHandler("../logs", "payment.log"));
 
 $f3 = \Base::instance();
 
-R::setup(getenv('PHINX_DBTYPE').":host=".getenv('PHINX_DBHOST').";dbname=".getenv('PHINX_DBNAME'),getenv('PHINX_DBUSER'),getenv('PHINX_DBPASS'));
+R::setup(getenv('DATABASE_URL'));
 R::freeze(true);
 
 \Stripe\Stripe::setApiKey(getenv('STRIPE_SECRET_KEY'));

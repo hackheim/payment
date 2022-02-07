@@ -10,13 +10,7 @@ return array(
                 'default_migration_table' => 'phinxlog',
                 'default_database' => 'production',
                 'production' => array(
-                    'host' => getenv('PHINX_DBHOST'),
-                    'name' => getenv('PHINX_DBNAME'),
-                    'user' => getenv('PHINX_DBUSER'),
-                    'pass' => getenv('PHINX_DBPASS'),
-                    'port' => 3306,
-                    'charset' => 'utf8',
-                    'adapter' => 'mysql'
+                    'dsn:' => getenv('DATABASE_URL')
                )
              ),
          'paths' =>
