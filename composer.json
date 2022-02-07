@@ -8,17 +8,6 @@
             "email": "hackheim@hackheim.no"
         }
     ],
-    "repositories": [{
-        "type": "package",
-        "package": {
-            "name": "redbeanphp",
-            "version": "master",
-            "dist": {
-                "url": "http://www.redbeanphp.com/downloadredbean.php",
-                "type": "tar"
-            }
-        }
-    }],
     "config": {
         "secure-http": false 
     },
@@ -29,7 +18,7 @@
     },
     "require": {
         "bcosca/fatfree-core": "dev-master",
-        "redbeanphp": "master@dev",
+        "gabordemooij/redbean": "dev-master",
         "vlucas/phpdotenv": "~2.4",
         "stripe/stripe-php": "~4.3",
         "oasis/logging": "~1.2",

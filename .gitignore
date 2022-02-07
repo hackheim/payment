@@ -4,6 +4,5 @@
 .bashrc
 /vendor
 .env
-composer.lock
 logs
 receipts
