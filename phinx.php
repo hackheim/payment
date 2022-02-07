@@ -1,7 +1,7 @@
 <?php
 require 'vendor/autoload.php';
-$dotenv = new Dotenv\Dotenv('./');
-$dotenv->load();
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+$dotenv->safeLoad();
 date_default_timezone_set(getenv('TIMEZONE'));
 
 return array(

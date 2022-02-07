@@ -14,8 +14,8 @@ use Mailgun\Mailgun;
 session_set_cookie_params(time()+3600*24, '/', getenv('DOMAIN'), getenv('SECURE_COOKIE')==='true', true);
 session_start();// for CSRF
 
-$dotenv = new Dotenv\Dotenv('../');
-$dotenv->load();
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+$dotenv->safeLoad();
 $dotenv->required(array(
     'DATABASE_URL',
     'STRIPE_SECRET_KEY',
