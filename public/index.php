@@ -11,6 +11,7 @@ use Oasis\Mlib\Logging\MLogging;
 use Respect\Validation\Validator as v;
 use Mailgun\Mailgun;
 use \RedBeanPHP\R as R;
+use Nyholm\Dsn\DsnParser;
 
 session_set_cookie_params(time()+3600*24, '/', getenv('DOMAIN'), getenv('SECURE_COOKIE')==='true', true);
 session_start();// for CSRF
@@ -43,7 +44,14 @@ MLogging::addHandler(new LocalFileHandler("../logs", "payment.log"));
 
 $f3 = \Base::instance();
 
-R::setup(str_replace("postgresql", "pgsql", getenv('DATABASE_URL')));
+$dsn = DsnParser::parse(getenv('DATABASE_URL'));
+
+R::setup($dsn ->getScheme().":host=".$dsn ->getHost().
+    ";dbname=".ltrim($dsn ->getPath(), array('/')).
+    ";port=".$dsn ->getPort(),
+    $dsn ->getUser(),
+    $dsn ->getPassword());
+
 R::freeze(true);
 
 \Stripe\Stripe::setApiKey(getenv('STRIPE_SECRET_KEY'));
