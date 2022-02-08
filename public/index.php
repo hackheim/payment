@@ -45,8 +45,12 @@ MLogging::addHandler(new LocalFileHandler("../logs", "payment.log"));
 $f3 = \Base::instance();
 
 $dsn = DsnParser::parse(getenv('DATABASE_URL'));
+$scheme = array(
+    "postgresql"=>"pgsql", 
+    "mysql"=>"mysql"
+    )[$dsn ->getScheme()];
 
-R::setup($dsn ->getScheme().":host=".$dsn ->getHost().
+R::setup($scheme.":host=".$dsn ->getHost().
     ";dbname=".ltrim($dsn ->getPath(), "/").
     ";port=".$dsn ->getPort(),
     $dsn ->getUser(),
