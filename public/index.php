@@ -47,7 +47,7 @@ $f3 = \Base::instance();
 $dsn = DsnParser::parse(getenv('DATABASE_URL'));
 
 R::setup($dsn ->getScheme().":host=".$dsn ->getHost().
-    ";dbname=".ltrim($dsn ->getPath(), array('/')).
+    ";dbname=".ltrim($dsn ->getPath(), "/").
     ";port=".$dsn ->getPort(),
     $dsn ->getUser(),
     $dsn ->getPassword());

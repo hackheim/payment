@@ -19,7 +19,7 @@ return array(
                 'default_database' => 'production',
                 'production' => array(
                     'host' => $dsn ->getHost(),
-                    'name' => ltrim($dsn ->getPath(), array('/')),
+                    'name' => ltrim($dsn ->getPath(), "/"),
                     'user' => $dsn ->getUser(),
                     'pass' => $dsn ->getPassword(),
                     'port' => $dsn ->getPort() ?? 3306,
