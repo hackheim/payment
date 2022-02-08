@@ -43,7 +43,7 @@ MLogging::addHandler(new LocalFileHandler("../logs", "payment.log"));
 
 $f3 = \Base::instance();
 
-R::setup(getenv('DATABASE_URL'));
+R::setup(str_replace("postgresql", "pgsql", getenv('DATABASE_URL')));
 R::freeze(true);
 
 \Stripe\Stripe::setApiKey(getenv('STRIPE_SECRET_KEY'));

@@ -10,7 +10,7 @@ return array(
                 'default_migration_table' => 'phinxlog',
                 'default_database' => 'production',
                 'production' => array(
-                    'dsn' => getenv('DATABASE_URL')
+                    'dsn' => str_replace("postgresql", "pgsql", getenv('DATABASE_URL'))
                )
              ),
          'paths' =>
